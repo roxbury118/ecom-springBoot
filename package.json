@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "vite",
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "start": "vite",  // This runs the Vite server
+    "dev": "vite",    // For local development
+    "build": "vite build", // For building the project for production
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0", // For linting your code
+    "preview": "vite preview" // To preview the built project
   },
   "dependencies": {
     "axios": "^1.6.8",
