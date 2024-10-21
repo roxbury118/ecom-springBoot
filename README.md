@@ -23,9 +23,9 @@ This project is a simple e-commerce application built using Spring Boot (Java) a
 
 **Frontend**: HTML, CSS, JavaScript
 
-**Database**: MySQL (or any other database as per your setup)
+**Database**: Hibernate
 
-**Dependencies**: Maven/Gradle for dependency management
+**Dependencies**: Maven for dependency management
 
 ## Installation
 
