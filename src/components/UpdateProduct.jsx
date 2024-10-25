@@ -5,7 +5,7 @@ import axios from "axios";
 const UpdateProduct = () => {
   const { id } = useParams();
   const [prod, setProd] = useState({});
-  const [image, setImage] = useState();
+  const [image, setImage] = useState(null);
   const [updateProd, setUpdateProd] = useState({
     id: null,
     p_name: "",
@@ -24,16 +24,17 @@ const UpdateProduct = () => {
         const response = await axios.get(
           `http://localhost:8080/api/product/${id}`
         );
-
         setProd(response.data);
-      
+        setUpdateProd(response.data);
+
         const responseImage = await axios.get(
           `http://localhost:8080/api/product/${id}/image`,
           { responseType: "blob" }
         );
-        const imageFile = await converUrlToFile(responseImage.data, response.data.imageName);
-        setImage(imageFile);     
-        setUpdateProd(response.data);
+        const imageFile = new File([responseImage.data], response.data.imageName, {
+          type: responseImage.data.type,
+        });
+        setImage(imageFile);
       } catch (error) {
         console.error("Error fetching product:", error);
       }
@@ -42,34 +43,30 @@ const UpdateProduct = () => {
     fetchProduct();
   }, [id]);
 
-  const converUrlToFile = async(blobData, fileName) => {
-    const file = new File([blobData], fileName, { type: blobData.type });
-    return file;
-  }
- 
-  const handleSubmit = async(e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const updatedProduct = new FormData();
-    updatedProduct.append("imageFile", image);
+    
+    // Append the updated image file if it exists
+    if (image) {
+      updatedProduct.append("imageFile", image);
+    }
+
+    // Append the product data as 'prod'
     updatedProduct.append(
-      "product",
+      "prod", // Make sure this matches your backend expectation
       new Blob([JSON.stringify(updateProd)], { type: "application/json" })
     );
-  
-    axios
-      .put(`http://localhost:8080/api/product/${id}`, updatedProduct, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      .then((response) => {
-        console.log("Product updated successfully:", updatedProduct);
-        alert("Product updated successfully!");
-      })
-      .catch((error) => {
-        console.error("Error updating product:", error);
-        alert("Failed to update product. Please try again.");
+
+    try {
+      await axios.put(`http://localhost:8080/api/product/${id}`, updatedProduct, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
+      alert("Product updated successfully!");
+    } catch (error) {
+      console.error("Error updating product:", error);
+      alert("Failed to update product. Please try again.");
+    }
   };
 
   const handleChange = (e) => {
@@ -79,14 +76,14 @@ const UpdateProduct = () => {
       [name]: value,
     });
   };
-  
+
   const handleImageChange = (e) => {
     setImage(e.target.files[0]);
   };
 
   return (
-    <div className="update-product-container" >
-      <div className="center-container" style={{marginTop:"7rem"}}>
+    <div className="update-product-container">
+      <div className="center-container" style={{ marginTop: "7rem" }}>
         <h1>Update Product</h1>
         <form className="row g-3 pt-1" onSubmit={handleSubmit}>
           <div className="col-md-6">
@@ -164,7 +161,6 @@ const UpdateProduct = () => {
               <option value="fashion">Fashion</option>
             </select>
           </div>
-
           <div className="col-md-4">
             <label className="form-label">
               <h6>Stock Quantity</h6>
@@ -184,7 +180,7 @@ const UpdateProduct = () => {
               <h6>Image</h6>
             </label>
             <img
-              src={image ? URL.createObjectURL(image) : "Image unavailable"}
+              src={image ? URL.createObjectURL(image) : ""}
               alt={prod.imageName}
               style={{
                 width: "100%",
@@ -218,7 +214,6 @@ const UpdateProduct = () => {
               <label className="form-check-label">Product Available</label>
             </div>
           </div>
-
           <div className="col-12">
             <button type="submit" className="btn btn-primary">
               Submit
